@@ -1,0 +1,44 @@
+from discord.ext import commands
+import discord
+
+bot_token = 'REmplaza esto por el token del bot'
+
+intents = discord.Intents.default()
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+video_channel_id = 123456789  # Reemplaza 123456789 con el ID del canal donde se suben los enlaces
+
+enlaces_registrados = {}
+
+@bot.event
+async def on_ready():
+    print(f'Bot conectado como {bot.user.name}')
+
+@bot.command()
+async def abrir_video(ctx):
+    user = ctx.author
+    if ctx.channel.id == video_channel_id and video_channel_id in enlaces_registrados:
+        enlaces_registrados[video_channel_id].add(user.id)
+        await ctx.send(f'{user.mention}, ¡Has ganado una recompensa por abrir el enlace de video! Aquí está tu premio.')
+
+        # Lógica para otorgar experiencia al usuario
+        xp_obtenida = await otorgar_experiencia(user)
+        await ctx.send(f'{user.mention}, se te han otorgado {xp_obtenida} puntos de experiencia.')
+    else:
+        await ctx.send('No se encontró ningún enlace de video en el canal de notificaciones.')
+
+@bot.command()
+async def registrar_enlace(ctx, enlace):
+    if ctx.channel.id == video_channel_id:
+        if video_channel_id not in enlaces_registrados:
+            enlaces_registrados[video_channel_id] = set()
+        enlaces_registrados[video_channel_id].add(enlace)
+        await ctx.send(f'Se ha registrado el enlace "{enlace}" en el canal.')
+
+async def otorgar_experiencia(member, amount=30):
+    # Lógica para otorgar puntos de experiencia al miembro
+    print(f'/modifyexp <add> <30> <@user>' )
+    
+    return amount
+
+bot.run(bot_token)
